@@ -32,7 +32,7 @@ export function ShipmentTable<Data extends object>({
   });
 
   return (
-    <div style={{overflowX:"auto"}}>
+    <div style={{overflowX:"auto", height: "30vh"}}>
     <Table>
       <Thead>
         {table.getHeaderGroups().map((headerGroup) => (

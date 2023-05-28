@@ -1,11 +1,12 @@
 import './App.css'
 import CustomerDashboard from './pages/CustomerDashboard'
+import PartnerDashboard from './pages/PartnerDashboard'
 
 function App() {
 
   return (
     <>
-      <CustomerDashboard />
+      <PartnerDashboard />
     </>
   )
 }

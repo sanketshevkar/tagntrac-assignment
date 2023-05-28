@@ -126,7 +126,7 @@ function CustomerDashboard() {
 
   return (
     <Flex flexDirection={"column"} gap={"3rem"} alignItems={"center"} marginTop={"5rem"}>
-        <Card minWidth={"50%"} maxWidth={"80%"} width={"60%"}>
+        <Card minWidth={"50%"} maxWidth={"80%"} width={"60%"} height={"30%"}>
             <CardHeader> Active Shipments </CardHeader>
             <CardBody>
             <ShipmentTable columns={activeShipmentsColumns} data={activeShipmentsData} />
