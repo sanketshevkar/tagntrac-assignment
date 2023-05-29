@@ -19,6 +19,10 @@ const partnerSchema = new mongoose.Schema({
     minlength: 6,
     maxlength: 1024
   },
+  isAssigned: {
+    type: Boolean,
+    default: false
+  },
   date: {
     type: Date,
     default: Date.now

@@ -45,7 +45,7 @@ router.post('/register', async (req, res) => {
         });
         try{
             const savedPartner = await partner.save();
-            res.send({ customer: savedPartner._id });
+            res.send({ partner: savedPartner._id });
         } catch (err) {
             res.status(400).send(err);
         }

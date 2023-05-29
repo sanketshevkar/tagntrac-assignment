@@ -1,9 +1,9 @@
 const router = require('express').Router();
-const Customer = require('../model/Customer');
 const { USER_TYPE } = require('../constants');
 const verify = require('./verifyToekn');
 const { createShipmentValidation } = require('../validation');
 const Shipment = require('../model/Shipment');
+const Partner = require('../model/Partner');
 
 router.post('/create', verify, async (req, res) => {
     if (req.user.userType === USER_TYPE.CUSTOMER) {
@@ -53,8 +53,13 @@ router.post('/assign', verify, async (req, res) => {
                 status: "Partner Assigned",
                 expectedDay: futureTimestamp
             });
+            await Partner.updateOne({
+                _id: req.body.partnerId
+            }, {
+                isAssigned: true
+            });
             const unassignedShipments = await Shipment.find({
-                status: "Not Assigned",
+                status: "Shipment Placed",
                 active: true
             });
             const assignedShipments = await Shipment.find({
@@ -77,7 +82,8 @@ router.post('/updateLocation', verify, async (req, res) => {
         const currentDate = Date.now();
         try {
             await Shipment.updateOne({
-                _id: req.body.shipmentId
+                _id: req.body.shipmentId,
+                partnerId: req.user._id
             }, {
                 lastLocation: req.body.newLocation,
                 lastLocationDate: currentDate,
@@ -101,13 +107,19 @@ router.post('/delivered', verify, async (req, res) => {
         const currentDate = Date.now();
         try {
             await Shipment.updateOne({
-                _id: req.body.shipmentId
+                _id: req.body.shipmentId,
+                partnerId: req.user._id
             }, {
                 status: "Delivered",
                 lastLocation: req.body.newLocation,
                 lastLocationDate: currentDate,
                 deliveryDay: currentDate,
                 active: false
+            });
+            await Partner.updateOne({
+                _id: req.user._id
+            }, {
+                isAssigned: false
             });
             const activeShipment = await Shipment.find({
                 _id: req.body.shipmentId,
@@ -126,6 +138,65 @@ router.post('/delivered', verify, async (req, res) => {
         }
         
     } else res.status(400).send("Only Partners can update shipments");
+})
+
+router.get('/getShipments', verify, async (req, res) => {
+    if (req.user.userType === USER_TYPE.CUSTOMER) {
+        try {
+            const activeShipments = await Shipment.find({
+                senderId: req.user._id,
+                active: true
+            });
+            const pastShipments = await Shipment.find({
+                senderId: req.user._id,
+                active: false
+            });
+            res.send({
+                activeShipments,
+                pastShipments
+            });
+        } catch (err) {
+            res.status(400).send(err);
+        }
+    } else  if (req.user.userType === USER_TYPE.PARTNER) {
+        try {
+            const activeShipment = await Shipment.find({
+                partnerId: req.user._id,
+                active: true
+            });
+            const pastShipments = await Shipment.find({
+                partnerId: req.user._id,
+                active: false
+            });
+            res.send({
+                activeShipment,
+                pastShipments
+            });
+        } catch (err) {
+            res.status(400).send(err);
+        }
+    } else if (req.user.userType === USER_TYPE.ADMIN){
+        try {
+            const unassignedShipments = await Shipment.find({
+                active: true,
+                status: "Shipment Placed"
+            });
+            const assignedShipments = await Shipment.find({
+                active: true,
+                status: "Partner Assigned"
+            });
+            const pastShipments = await Shipment.find({
+                active: false
+            });
+            res.send({
+                unassignedShipments,
+                assignedShipments,
+                pastShipments
+            });
+        } catch (err) {
+            res.status(400).send(err);
+        }
+    } else res.status(400).send('Access Denied')
 })
 
 module.exports = router;
