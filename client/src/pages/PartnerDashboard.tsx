@@ -1,6 +1,7 @@
 import { Heading, Text, Card, CardBody, CardHeader, Flex } from "@chakra-ui/react"
 import { createColumnHelper } from "@tanstack/react-table"
 import { ShipmentTable } from "../components/ShipmentsTable";
+import { useEffect, useState } from "react";
 
 type PastShipments = {
     sender: string;
@@ -11,32 +12,6 @@ type PastShipments = {
     deliveryDate: string
 };
 
-  const pastShipmentsData: PastShipments[] = [
-    {
-        sender: "Infosys",
-        receiver: "Google",
-        from: "Pune",
-        to: "Banglore",
-        status: "Delivered",
-        deliveryDate: "Tuesday 21/01/2023"
-    },
-    {
-        sender: "Infosys",
-        receiver: "Google",
-        from: "Pune",
-        to: "Banglore",
-        status: "Cancelled",
-        deliveryDate: "Not delivered"
-    },
-    {
-        sender: "Infosys",
-        receiver: "Google",
-        from: "Pune",
-        to: "Banglore",
-        status: "Delivered",
-        deliveryDate: "Tuesday 21/01/2023"
-    }
-  ];
   const pastShipmentsColumnHelper = createColumnHelper<PastShipments>();
 
   const pastShipmentsColumns = [
@@ -68,6 +43,54 @@ type PastShipments = {
   
 
 function PartnerDashboard() {
+    const activeShipment = {
+        senderName: '',
+        receiverName: '',
+        from: '',
+        to: '',
+        status: '',
+        deliveryDay: ''
+    }
+    const [pastShipmentsData, setPastShipmentData] = useState([]);
+    const [activeShipmentData, setActiveShipmentData] = useState(activeShipment);
+
+    useEffect(() => {
+        const authToken = localStorage.getItem('token'); // Retrieve the auth token from localStorage
+
+        fetch('http://localhost:3000/api/shipment/getShipments', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'auth-token': authToken,
+        },
+        })
+        .then(response => {
+            if (response.ok) {
+            return response.json();
+            } else {
+            throw new Error('Request failed');
+            }
+        })
+        .then(data => {
+            console.log(data.activeShipment);
+            const pastShipments = data.pastShipments.map((shipment: any) => {
+                return {
+                    sender: shipment.senderName,
+                    receiver: shipment.receiverName,
+                    from: shipment.from,
+                    to: shipment.to,
+                    status: shipment.status,
+                    deliveryDate: shipment.deliveryDay
+                }
+            })
+            setPastShipmentData(pastShipments);
+
+            if (data.activeShipment.length > 0) setActiveShipmentData(data.activeShipment[0]);
+        })
+        .catch(error => {
+            console.error(error);
+        });
+    }, [])
 
   return (
     <Flex flexDirection={"column"} gap={"3rem"} alignItems={"center"} marginTop={"5rem"}>
@@ -79,37 +102,37 @@ function PartnerDashboard() {
                         <Heading as='h5' size='sm'>
                             Sender
                         </Heading>
-                        <Text fontSize='sm'>Amazon</Text>
+                        <Text fontSize='sm'>{activeShipmentData.senderName}</Text>
                     </Flex>
                     <Flex flexDirection={"column"}>
                         <Heading as='h5' size='sm'>
                             Receiver
                         </Heading>
-                        <Text fontSize='sm'>Google</Text>
+                        <Text fontSize='sm'>{activeShipmentData.receiverName}</Text>
                     </Flex>
                     <Flex flexDirection={"column"}>
                         <Heading as='h5' size='sm'>
                             Source
                         </Heading>
-                        <Text fontSize='sm'>Pune</Text>
+                        <Text fontSize='sm'>{activeShipmentData.to}</Text>
                     </Flex>
                     <Flex flexDirection={"column"}>
                         <Heading as='h5' size='sm'>
                             Destination
                         </Heading>
-                        <Text fontSize='sm'>Mumbai</Text>
+                        <Text fontSize='sm'>{activeShipmentData.from}</Text>
                     </Flex>
                     <Flex flexDirection={"column"}>
                         <Heading as='h5' size='sm'>
                             Delivery By
                         </Heading>
-                        <Text fontSize='sm'>Tuesday 21/01/2023</Text>
+                        <Text fontSize='sm'>{activeShipmentData.expectedDay}</Text>
                     </Flex>
                     <Flex flexDirection={"column"}>
                         <Heading as='h5' size='sm'>
                             Last Status
                         </Heading>
-                        <Text fontSize='sm'>Karjat, Tuesday 21/01/2023</Text>
+                        <Text fontSize='sm'>{activeShipmentData.lastLocation}</Text>
                     </Flex>
             </Flex>
             </CardBody>

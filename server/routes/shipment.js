@@ -141,6 +141,7 @@ router.post('/delivered', verify, async (req, res) => {
 })
 
 router.get('/getShipments', verify, async (req, res) => {
+    console.log(req.body)
     if (req.user.userType === USER_TYPE.CUSTOMER) {
         try {
             const activeShipments = await Shipment.find({

@@ -57,47 +57,47 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
 
     const { error } = loginValidation(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
-
+    if (error) return res.status(400).send(error.details[0]);
     if(req.body.userType == USER_TYPE.CUSTOMER) {
         const customer = await Customer.findOne({ email: req.body.email });
-        if (!customer) return res.status(400).send('Email or password is incorrect');
+        if (!customer) return res.status(400).send({error: 'Email or password is incorrect'});
 
         const validPass = await bcrypt.compare(req.body.password, customer.password);
-        if(!validPass) return res.status(400).send('Email or password is incorrect');
+        if(!validPass) return res.status(400).send({error: 'Email or password is incorrect'});
 
         const token = jwt.sign({
             _id: customer._id,
             userType: USER_TYPE.CUSTOMER
         }, process.env.TOKEN_SECRET);
-        res.header('auth-token', token).send(token);
+        res.header('auth-token', token).send({token});
 
     } else if(req.body.userType == USER_TYPE.PARTNER) {
         const partner = await Partner.findOne({ email: req.body.email });
-        if (!partner) return res.status(400).send('Email or password is incorrect');
+        if (!partner) return res.status(400).send({error: 'Email or password is incorrect'});
+        console.log(req.body);
 
         const validPass = await bcrypt.compare(req.body.password, partner.password);
-        if(!validPass) return res.status(400).send('Email or password is incorrect');
+        if(!validPass) return res.status(400).send({error: 'Email or password is incorrect'});
 
         const token = jwt.sign({
             _id: partner._id,
             userType: USER_TYPE.PARTNER
         }, process.env.TOKEN_SECRET);
-        res.header('auth-token', token).send(token);
+        res.header('auth-token', token).send({token});
     } else if(req.body.userType == USER_TYPE.ADMIN) {
         const admin = await Admin.findOne({ email: req.body.email });
-        if (!admin) return res.status(400).send('Email or password is incorrect');
+        if (!admin) return res.status(400).send({error: 'Email or password is incorrect'});
 
         const validPass = await bcrypt.compare(req.body.password, admin.password);
-        if(!validPass) return res.status(400).send('Email or password is incorrect');
+        if(!validPass) return res.status(400).send({error: 'Email or password is incorrect'});
 
         const token = jwt.sign({
             _id: admin._id,
             userType: USER_TYPE.ADMIN
         }, process.env.TOKEN_SECRET);
-        res.header('auth-token', token).send(token);
+        res.header('auth-token', token).send({token});
     } else {
-        res.status(400).send('Please select a correct role!');
+        res.status(400).send({error: 'Please select a correct role!'});
     }
 });
 
