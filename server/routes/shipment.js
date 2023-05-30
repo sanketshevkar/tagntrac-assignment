@@ -9,17 +9,32 @@ router.post('/create', verify, async (req, res) => {
     if (req.user.userType === USER_TYPE.CUSTOMER) {
         const { error } = createShipmentValidation(req.body);
         if (error) return res.status(400).send(error.details[0].message);
-
-        const shipment = new Shipment({
-            senderName: req.body.senderName,
-            receiverName: req.body.receiverName,
-            senderId: req.user._id,
-            description: req.body.description,
-            from: req.body.from,
-            to: req.body.to,
-            lastLocation: req.body.lastLocation,
-        });
         try {
+            const currentDate = Date.now();
+            const futureDate = new Date(currentDate);
+            futureDate.setDate(futureDate.getDate() + 7);
+            const futureTimestamp = futureDate.getTime();
+
+            const allUnassignedPartners = await Partner.find({
+                isAssigned: false
+            });
+
+            let partner;
+            if(allUnassignedPartners.length) partner = allUnassignedPartners[0];
+            const shipment = new Shipment({
+                senderName: req.body.senderName,
+                receiverName: req.body.receiverName,
+                partner: partner.name,
+                partnerId: partner._id,
+                senderId: req.user._id,
+                status: "Partner Assigned",
+                expectedDay: futureTimestamp,
+                description: req.body.description,
+                from: req.body.from,
+                to: req.body.to,
+                lastLocation: req.body.lastLocation,
+            });
+
             const savedShipment = await shipment.save();
             const allActiveShipments = await Shipment.find({
                 senderId: req.user._id,
@@ -30,10 +45,10 @@ router.post('/create', verify, async (req, res) => {
                 allActiveShipments
             });
         } catch (err) {
-            res.status(400).send(err);
+            res.status(400).send({err});
         }
         
-    } else res.status(400).send("Only customers can create shipments");
+    } else res.status(400).send({err: "Only customers can create shipments"});
 })
 
 router.post('/assign', verify, async (req, res) => {
@@ -141,7 +156,6 @@ router.post('/delivered', verify, async (req, res) => {
 })
 
 router.get('/getShipments', verify, async (req, res) => {
-    console.log(req.body)
     if (req.user.userType === USER_TYPE.CUSTOMER) {
         try {
             const activeShipments = await Shipment.find({

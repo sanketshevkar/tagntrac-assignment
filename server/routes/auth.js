@@ -14,6 +14,7 @@ router.post('/register', async (req, res) => {
     if (error) return res.status(400).send(error.details[0].message);
 
     if(req.body.userType == USER_TYPE.CUSTOMER) {
+
         const emailExists = await Customer.findOne({ email: req.body.email });
         if (emailExists) return res.status(400).send('Email already exists');
 
@@ -31,7 +32,9 @@ router.post('/register', async (req, res) => {
         } catch (err) {
             res.status(400).send(err);
         }
-    } else if(req.body.userType == USER_TYPE.PARTNER) {
+    } 
+    else if(req.body.userType == USER_TYPE.PARTNER) {
+
         const emailExists = await Partner.findOne({ email: req.body.email });
         if (emailExists) return res.status(400).send('Email already exists');
 
@@ -49,7 +52,8 @@ router.post('/register', async (req, res) => {
         } catch (err) {
             res.status(400).send(err);
         }
-    } else {
+    } 
+    else {
         res.status(400).send('Please select a correct role!');
     }
 });
@@ -58,7 +62,9 @@ router.post('/login', async (req, res) => {
 
     const { error } = loginValidation(req.body);
     if (error) return res.status(400).send(error.details[0]);
+
     if(req.body.userType == USER_TYPE.CUSTOMER) {
+
         const customer = await Customer.findOne({ email: req.body.email });
         if (!customer) return res.status(400).send({error: 'Email or password is incorrect'});
 
@@ -71,10 +77,11 @@ router.post('/login', async (req, res) => {
         }, process.env.TOKEN_SECRET);
         res.header('auth-token', token).send({token});
 
-    } else if(req.body.userType == USER_TYPE.PARTNER) {
+    } 
+    else if(req.body.userType == USER_TYPE.PARTNER) {
+
         const partner = await Partner.findOne({ email: req.body.email });
         if (!partner) return res.status(400).send({error: 'Email or password is incorrect'});
-        console.log(req.body);
 
         const validPass = await bcrypt.compare(req.body.password, partner.password);
         if(!validPass) return res.status(400).send({error: 'Email or password is incorrect'});
@@ -84,7 +91,9 @@ router.post('/login', async (req, res) => {
             userType: USER_TYPE.PARTNER
         }, process.env.TOKEN_SECRET);
         res.header('auth-token', token).send({token});
-    } else if(req.body.userType == USER_TYPE.ADMIN) {
+    } 
+    else if(req.body.userType == USER_TYPE.ADMIN) {
+
         const admin = await Admin.findOne({ email: req.body.email });
         if (!admin) return res.status(400).send({error: 'Email or password is incorrect'});
 

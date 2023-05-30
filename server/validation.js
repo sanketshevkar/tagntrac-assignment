@@ -23,7 +23,6 @@ const createShipmentValidation = data => {
     const schema = Joi.object({
         senderName: Joi.string().min(2).max(50).required(),
         receiverName: Joi.string().min(2).max(50).required(),
-        senderId: Joi.string().required(),
         description: Joi.string().min(2).max(2000).required(),
         from: Joi.string().min(2).max(50).required(),
         to: Joi.string().min(2).max(50).required(),
