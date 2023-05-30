@@ -2,7 +2,6 @@ import { Formik, Field } from "formik";
 import {
   Card,
   Button,
-  Checkbox,
   Flex,
   FormControl,
   FormLabel,
@@ -44,7 +43,6 @@ export default function LoginPage({ isAdmin = false }) {
     .then((result) => result.json()).then((data) => {
       if (data.error) alert(data.error);
       else {
-        console.log(data);
         localStorage.setItem("token", data.token);
         if(values.userType === 'customer') navigate('/customerDashboard');
         if(values.userType === 'partner') navigate('/partnerDashboard');
@@ -54,7 +52,7 @@ export default function LoginPage({ isAdmin = false }) {
   }
   return (
     <Flex align="center" justify="center" h="100vh">
-      <Card bg="white" p={6} w={"25vw"}>
+      <Card bg="white" p={6} minWidth={"25vw"}>
         <Formik
           initialValues={{
             email: "",
@@ -124,17 +122,11 @@ export default function LoginPage({ isAdmin = false }) {
                : 
                 <Box></Box>
               }
-                <Box></Box>
-                <Field
-                  as={Checkbox}
-                  id="rememberMe"
-                  name="rememberMe"
-                  colorScheme="purple"
-                >
-                  Remember me?
-                </Field>
                 <Button type="submit" backgroundColor="#00c795" color={"white"} width="full">
                   Login
+                </Button>
+                <Button onClick={()=>navigate('/signup')} type="submit" width="full">
+                  Resgister
                 </Button>
               </VStack>
             </form>

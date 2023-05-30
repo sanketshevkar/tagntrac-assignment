@@ -1,18 +1,24 @@
 import { Navigate } from "react-router-dom";
 
 
-const isAuthenticated = () => {
+const PrivateRoute = ({ setIsLoggedIn, element }: any) => {
+  const isAuthenticated = () => {
     const storedToken = localStorage.getItem("token");
-    if (!storedToken) return false;
-    else return true;
+    if (!storedToken){
+      setIsLoggedIn(false);
+      return false;
+    }
+    else {
+      setIsLoggedIn(true);
+      return true
+    }
   };
 
-const PrivateRoute = ({ element }: any) => {
-    return isAuthenticated() ? (
-        element
-        ) : (
-        <Navigate to="/login" replace={true} />
-        );
+  return isAuthenticated() ? (
+      element
+      ) : (
+      <Navigate to="/login" replace={true} />
+      );
 };
 
 export default PrivateRoute;

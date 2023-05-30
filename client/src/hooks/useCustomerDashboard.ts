@@ -23,7 +23,6 @@ export default function useCustomerDashboard() {
             }
         })
         .then(data => {
-            console.log(data);
             const activeShipments = data.activeShipments.map((shipment: any) => {
                 return {
                     receiver: shipment.receiverName,

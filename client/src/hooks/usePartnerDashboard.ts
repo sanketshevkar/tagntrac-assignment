@@ -31,7 +31,6 @@ export function usePartnerDashboard () {
             }
         })
         .then(data => {
-            console.log(data.activeShipment);
             const pastShipments = data.pastShipments.map((shipment: any) => {
                 return {
                     sender: shipment.senderName,

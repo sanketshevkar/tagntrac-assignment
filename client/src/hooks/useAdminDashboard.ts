@@ -24,7 +24,6 @@ export default function useAdminDashboard () {
           }
       })
       .then(data => {
-          console.log(data);
           const unassignedShipments = data.unassignedShipments.map((shipment: any) => {
             return {
                 sender: shipment.senderName,
@@ -39,6 +38,7 @@ export default function useAdminDashboard () {
             return {
                 sender: shipment.senderName,
                 receiver: shipment.receiverName,
+                partner: shipment.partner,
                 from: shipment.from,
                 to: shipment.to,
                 lastLocation: shipment.lastLocation,
