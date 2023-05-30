@@ -20,7 +20,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/signup" element={<SignupPage />} />
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/*" element={<LoginPage />} />
         <Route path="/adminLogin" element={<LoginPage isAdmin={true} />} />
         <Route path="/partnerDashboard" element={<PrivateRoute setIsLoggedIn={setIsLoggedIn} element={<PartnerDashboard />} />} />
         <Route path="/customerDashboard" element={<PrivateRoute setIsLoggedIn={setIsLoggedIn} element={<CustomerDashboard />} />} />
