@@ -23,12 +23,12 @@ type values = {
   userType: string
 }
 
-export default function LoginPage() {
+export default function LoginPage({ isAdmin = false }) {
 
   const navigate = useNavigate();
 
   const onSubmitHandler = (values: values) => {
-    console.log(values)
+    if (isAdmin) values.userType = 'admin';
     const options = {
       method: 'POST',
       headers: {
@@ -48,6 +48,7 @@ export default function LoginPage() {
         localStorage.setItem("token", data.token);
         if(values.userType === 'customer') navigate('/customerDashboard');
         if(values.userType === 'partner') navigate('/partnerDashboard');
+        if(values.userType === 'admin') navigate('/adminDashboard');
       }
     }).catch((error) => alert(error));
   }
@@ -95,30 +96,34 @@ export default function LoginPage() {
                   />
                   <FormErrorMessage>{errors.password}</FormErrorMessage>
                 </FormControl>
+                { !isAdmin ? 
                 <FormControl as='fieldset'>
-                  <FormLabel as='legend'>
-                    Please select your role
-                  </FormLabel>
-                  <RadioGroup id="userType" name="userType">
-                    <HStack spacing="24px">
-                      <Field name="userType">
-                        {({ field }: any) => (
-                          <Radio {...field} value="customer">
-                            Customer
-                          </Radio>
-                        )}
-                      </Field>
-                      <Field name="userType">
-                        {({ field }: any) => (
-                          <Radio {...field} value="partner">
-                            Delivery Partner
-                          </Radio>
-                        )}
-                      </Field>
-                    </HStack>
-                  </RadioGroup>
-                  <FormHelperText>Please select one</FormHelperText>
-                </FormControl>
+                <FormLabel as='legend'>
+                  Please select your role
+                </FormLabel>
+                <RadioGroup id="userType" name="userType">
+                  <HStack spacing="24px">
+                    <Field name="userType">
+                      {({ field }: any) => (
+                        <Radio {...field} value="customer">
+                          Customer
+                        </Radio>
+                      )}
+                    </Field>
+                    <Field name="userType">
+                      {({ field }: any) => (
+                        <Radio {...field} value="partner">
+                          Delivery Partner
+                        </Radio>
+                      )}
+                    </Field>
+                  </HStack>
+                </RadioGroup>
+                <FormHelperText>Please select one</FormHelperText>
+              </FormControl>
+               : 
+                <Box></Box>
+              }
                 <Box></Box>
                 <Field
                   as={Checkbox}

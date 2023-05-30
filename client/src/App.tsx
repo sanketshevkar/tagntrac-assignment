@@ -17,6 +17,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/adminLogin" element={<LoginPage isAdmin={true} />} />
         <Route path="/partnerDashboard" element={<PrivateRoute element={<PartnerDashboard />} />} />
         <Route path="/customerDashboard" element={<PrivateRoute element={<CustomerDashboard />} />} />
         <Route path="/adminDashboard" element={<PrivateRoute element={<AdminDashboard />} />} />

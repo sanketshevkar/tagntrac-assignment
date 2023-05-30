@@ -1,13 +1,13 @@
 import { Card, CardBody, CardHeader, Flex } from "@chakra-ui/react"
 import { createColumnHelper } from "@tanstack/react-table"
 import { ShipmentTable } from "../components/ShipmentsTable";
+import { useEffect, useState } from "react";
 
 type UnassignedShipments = {
     sender: string;
     receiver: string;
     from: string;
     to: string;
-    expectedDay: string
 };
 
 type ActiveShipments = {
@@ -29,90 +29,6 @@ type PastShipments = {
     status: string;
     deliveryDate: string
 };
-
-const unassignedShipmentsData: UnassignedShipments[] = [
-    {
-        sender: "Infosys",
-        receiver: "Google",
-        from: "Pune",
-        to: "Banglore",
-        expectedDay: "Tuesday 21/01/2023"
-    },
-    {
-        sender: "Infosys",
-        receiver: "Google",
-        from: "Pune",
-        to: "Banglore",
-        expectedDay: "Tuesday 21/01/2023"
-    },
-    {
-        sender: "Infosys",
-        receiver: "Google",
-        from: "Pune",
-        to: "Banglore",
-        expectedDay: "Tuesday 21/01/2023"
-    }
-  ];
-
-  const activeShipmentsData: ActiveShipments[] = [
-    {
-        sender: "Infosys",
-        receiver: "Google",
-        from: "Pune",
-        to: "Banglore",
-        partner: "Sanket",
-        lastLocation: "Dharwad",
-        expectedDay: "Tuesday 21/01/2023"
-    },
-    {
-        sender: "Infosys",
-        receiver: "Google",
-        from: "Pune",
-        to: "Banglore",
-        partner: "Sanket",
-        lastLocation: "Dharwad",
-        expectedDay: "Tuesday 21/01/2023"
-    },
-    {
-        sender: "Infosys",
-        receiver: "Google",
-        from: "Pune",
-        to: "Banglore",
-        partner: "Sanket",
-        lastLocation: "Dharwad",
-        expectedDay: "Tuesday 21/01/2023"
-    }
-  ];
-
-  const pastShipmentsData: PastShipments[] = [
-    {
-        sender: "Infosys",
-        receiver: "Google",
-        from: "Pune",
-        to: "Banglore",
-        partner: "Sanket",
-        status: "Delivered",
-        deliveryDate: "Tuesday 21/01/2023"
-    },
-    {
-        sender: "Infosys",
-        receiver: "Google",
-        from: "Pune",
-        to: "Banglore",
-        partner: "Sanket",
-        status: "Cancelled",
-        deliveryDate: "Not delivered"
-    },
-    {
-        sender: "Infosys",
-        receiver: "Google",
-        from: "Pune",
-        to: "Banglore",
-        partner: "Sanket",
-        status: "Delivered",
-        deliveryDate: "Tuesday 21/01/2023"
-    }
-  ];
 
   const activeShipmentsColumnHelper = createColumnHelper<ActiveShipments>();
 
@@ -199,15 +115,74 @@ const unassignedShipmentsData: UnassignedShipments[] = [
         cell: (info) => info.getValue(),
         header: "Destination",
       }),
-      unassignedShipmentsColumnHelper.accessor("expectedDay", {
-          cell: (info) => info.getValue(),
-          header: "Deliver By",
-        })
-      
+    
   ];
   
 
 function AdminDashboard() {
+  const [pastShipmentsData, setPastShipmentData] = useState([]);
+  const [activeShipmentsData, setActiveShipmentsData] = useState([]);
+  const [unassignedShipmentsData, setUnassignedShipmentsData] = useState([]);
+
+  useEffect(() => {
+    const authToken = localStorage.getItem('token'); // Retrieve the auth token from localStorage
+
+    fetch('http://localhost:3000/api/shipment/getShipments', {
+    method: 'GET',
+    // @ts-ignore
+    headers: {
+        'Content-Type': 'application/json',
+        'auth-token': authToken,
+    },
+    })
+    .then(response => {
+        if (response.ok) {
+        return response.json();
+        } else {
+        throw new Error('Request failed');
+        }
+    })
+    .then(data => {
+        console.log(data);
+        const unassignedShipments = data.unassignedShipments.map((shipment: any) => {
+          return {
+              sender: shipment.senderName,
+              receiver: shipment.receiverName,
+              from: shipment.from,
+              to: shipment.to,
+          }
+      })
+      setUnassignedShipmentsData(unassignedShipments);
+
+        const activeShipments = data.assignedShipments.map((shipment: any) => {
+          return {
+              sender: shipment.senderName,
+              receiver: shipment.receiverName,
+              from: shipment.from,
+              to: shipment.to,
+              lastLocation: shipment.lastLocation,
+              expectedDay: shipment.expectedDay
+          }
+      })
+      setActiveShipmentsData(activeShipments);
+
+        const pastShipments = data.pastShipments.map((shipment: any) => {
+            return {
+                sender: shipment.senderName,
+                receiver: shipment.receiverName,
+                from: shipment.from,
+                to: shipment.to,
+                partner: shipment.partner,
+                status: shipment.status,
+                deliveryDate: shipment.deliveryDay
+            }
+        })
+        setPastShipmentData(pastShipments);
+    })
+    .catch(error => {
+        console.error(error);
+    });
+}, [])
 
   return (
     <Flex flexDirection={"column"} gap={"3rem"} alignItems={"center"} marginTop={"5rem"}>

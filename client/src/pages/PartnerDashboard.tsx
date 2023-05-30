@@ -48,8 +48,8 @@ function PartnerDashboard() {
         receiverName: '',
         from: '',
         to: '',
-        status: '',
-        deliveryDay: ''
+        expectedDay: '',
+        lastLocation: ''
     }
     const [pastShipmentsData, setPastShipmentData] = useState([]);
     const [activeShipmentData, setActiveShipmentData] = useState(activeShipment);
@@ -59,6 +59,7 @@ function PartnerDashboard() {
 
         fetch('http://localhost:3000/api/shipment/getShipments', {
         method: 'GET',
+        // @ts-ignore
         headers: {
             'Content-Type': 'application/json',
             'auth-token': authToken,

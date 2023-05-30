@@ -1,13 +1,7 @@
-import { Heading, Avatar, Card, CardBody, CardHeader, Flex } from "@chakra-ui/react"
+import { Card, CardBody, CardHeader, Flex } from "@chakra-ui/react"
 import { createColumnHelper } from "@tanstack/react-table"
 import { ShipmentTable } from "../components/ShipmentsTable";
-import AvatarGreeting from "../components/AvatarGreeting";
-
-type UnitConversion = {
-    fromUnit: string;
-    toUnit: string;
-    factor: number;
-};
+import { useEffect, useState } from "react";
 
 type ActiveShipments = {
     receiver: string;
@@ -24,54 +18,6 @@ type PastShipments = {
     status: string,
     deliveryDate: string
 };
-
-  const activeShipmentsData: ActiveShipments[] = [
-    {
-        receiver: "Google",
-        from: "Pune",
-        to: "Banglore",
-        lastLocation: "Dharwad",
-        expectedDay: "Tuesday 21/01/2023"
-    },
-    {
-        receiver: "Google",
-        from: "Pune",
-        to: "Banglore",
-        lastLocation: "Dharwad",
-        expectedDay: "Tuesday 21/01/2023"
-    },
-    {
-        receiver: "Google",
-        from: "Pune",
-        to: "Banglore",
-        lastLocation: "Dharwad",
-        expectedDay: "Tuesday 21/01/2023"
-    }
-  ];
-
-  const pastShipmentsData: PastShipments[] = [
-    {
-        receiver: "Google",
-        from: "Pune",
-        to: "Banglore",
-        status: "Delivered",
-        deliveryDate: "Tuesday 21/01/2023"
-    },
-    {
-        receiver: "Google",
-        from: "Pune",
-        to: "Banglore",
-        status: "Cancelled",
-        deliveryDate: "Not delivered"
-    },
-    {
-        receiver: "Google",
-        from: "Pune",
-        to: "Banglore",
-        status: "Delivered",
-        deliveryDate: "Tuesday 21/01/2023"
-    }
-  ];
   const activeShipmentsColumnHelper = createColumnHelper<ActiveShipments>();
   const pastShipmentsColumnHelper = createColumnHelper<PastShipments>();
 
@@ -123,6 +69,56 @@ type PastShipments = {
   
 
 function CustomerDashboard() {
+
+  const [pastShipmentsData, setPastShipmentData] = useState([]);
+  const [activeShipmentsData, setActiveShipmentsData] = useState([]);
+
+  useEffect(() => {
+    const authToken = localStorage.getItem('token'); // Retrieve the auth token from localStorage
+
+    fetch('http://localhost:3000/api/shipment/getShipments', {
+    method: 'GET',
+    // @ts-ignore
+    headers: {
+        'Content-Type': 'application/json',
+        'auth-token': authToken,
+    },
+    })
+    .then(response => {
+        if (response.ok) {
+        return response.json();
+        } else {
+        throw new Error('Request failed');
+        }
+    })
+    .then(data => {
+        console.log(data);
+        const activeShipments = data.activeShipments.map((shipment: any) => {
+            return {
+                receiver: shipment.receiverName,
+                from: shipment.from,
+                to: shipment.to,
+                lastLocation: shipment.lastLocation,
+                expectedDay: shipment.expectedDay
+            }
+        })
+        setActiveShipmentsData(activeShipments);
+
+        const pastShipments = data.pastShipments.map((shipment: any) => {
+          return {
+              receiver: shipment.receiverName,
+              from: shipment.from,
+              to: shipment.to,
+              status: shipment.status,
+              deliveryDate: shipment.deliveryDay
+          }
+      })
+      setPastShipmentData(pastShipments);
+    })
+    .catch(error => {
+        console.error(error);
+    });
+}, [])
 
   return (
     <Flex flexDirection={"column"} gap={"3rem"} alignItems={"center"} marginTop={"5rem"}>
